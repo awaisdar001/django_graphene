@@ -14,6 +14,9 @@ mechanism.
 4. Non-users can reserve a specific time by providing their full name and email for the meeting
 5. Non-user can’t reserve a time that has been already reserved 
 
+**How to run the API**
+I have used `GraphiQL` django app for running the application & testing the quries. Follow the step by step guide below to run & test the GraphQL quries. I have also provided demo quries with their responses below.
+
 ### Getting Started 
 
 #### Create virtual Env
