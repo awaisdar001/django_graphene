@@ -72,7 +72,7 @@ class Booking(models.Model):
     date = models.DateField()
     start_time = models.TimeField()
     end_time = models.TimeField()
-    total_time = models.PositiveIntegerField(max_length=3)
+    total_time = models.PositiveIntegerField()
 
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True)

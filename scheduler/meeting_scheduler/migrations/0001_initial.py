@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
                 ('date', models.DateField()),
                 ('start_time', models.TimeField()),
                 ('end_time', models.TimeField()),
-                ('total_time', models.PositiveIntegerField(max_length=3)),
+                ('total_time', models.PositiveIntegerField()),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='user_bookings', to=settings.AUTH_USER_MODEL)),
