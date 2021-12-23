@@ -36,7 +36,7 @@ class Availability(models.Model):
         unique_together = ('user', 'from_time', 'to_time')
 
     @staticmethod
-    def user_has_availability(user, target_date, start_time, end_time, total_time):
+    def user_has_availability(user, target_date, start_time, end_time):
         """
         Checks if user has availability in the provided span range.
         Arguments:
