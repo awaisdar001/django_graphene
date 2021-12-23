@@ -15,7 +15,12 @@ mechanism.
 5. Non-user can’t reserve a time that has been already reserved 
 
 **How to run the API**
-I have used `GraphiQL` django app for running the application & testing the quries. Follow the step by step guide below to run & test the GraphQL quries. I have also provided demo quries with their responses below.
+
+I have used `GraphiQL` django app for running the application & testing the quries. GraphiQL is an in-browser tool for writing, validating, and
+testing GraphQL queries. Follow the step by step guide below to run & test the GraphQL quries. I have also provided demo quries with their responses below.
+
+
+<img width="1371" alt="Screen Shot 2021-12-24 at 3 25 55 AM" src="https://user-images.githubusercontent.com/4252738/147296260-1f2f256b-3cb7-4fe7-88b3-bc6121cfe7f5.png">
 
 ### Getting Started 
 
@@ -324,6 +329,9 @@ mutation{
 }
 ```
 #### Error overlapping booking
+
+<img width="1223" alt="Screen Shot 2021-12-24 at 3 27 06 AM" src="https://user-images.githubusercontent.com/4252738/147296373-e24ae08f-a2d6-411e-8206-1e6a0e43927f.png">
+
 ```yaml
 {
   "errors": [
