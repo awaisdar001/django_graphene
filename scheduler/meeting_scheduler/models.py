@@ -1,4 +1,4 @@
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -47,10 +47,9 @@ class Availability(models.Model):
         """
         target_start_datetime = datetime.combine(target_date, start_time)
         target_end_datetime = datetime.combine(target_date, end_time)
-        return Availability.objects.filter(
-            user=user,
-            from_time__lte=target_start_datetime,
-            to_time__gte=target_end_datetime,
+
+        return Availability.objects.filter(user=user).filter(
+            Q(from_time__lte=target_start_datetime) | Q(to_time__gte=target_end_datetime)
         ).count()
 
 
@@ -77,12 +76,12 @@ class Booking(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def validate_if_booking_has_already_exists(self):
-        """
-        Checks weather a booking for user already exists or not.
-        Returns (Boolean): boolean value
-        """
-        return Booking.objects.filter(user=self.user, date=self.date, start_time=self.start_time).exists()
+    # def validate_if_booking_has_already_exists(self):
+    #     """
+    #     Checks weather a booking for user already exists or not.
+    #     Returns (Boolean): boolean value
+    #     """
+    #     return Booking.objects.filter(user=self.user, date=self.date, start_time=self.start_time).exists()
 
     def is_valid_new_booking(self):
         """
@@ -99,32 +98,45 @@ class Booking(models.Model):
         Raises:
             ValueError - in case of any validation fails
         """
-        self.end_time = (
-                datetime.combine(date.today(), self.start_time) + timedelta(minutes=self.total_time)
-        ).time()
-        already_booked = self.validate_if_booking_has_already_exists()
-        if already_booked:
-            raise ValueError(f'{self.user.username} has already been booked for {self.start_time}')
+        if not self.end_time:
+            self.end_time = self._end_time()
+
+        # already_booked = self.validate_if_booking_has_already_exists()
+        # if already_booked:
+        #     raise ValueError(f'{self.user.username} has already been booked for {self.start_time}')
 
         has_availability = Availability.user_has_availability(
             user=self.user,
             target_date=self.date,
             start_time=self.start_time,
             end_time=self.end_time,
-            total_time=self.total_time
         )
         if not has_availability:
             raise ValueError(f'{self.user.username} has no availability in this slot.')
+
         is_overlapping_booking = self.is_overlapping_booking()
         if is_overlapping_booking:
-            raise ValueError(f'The slot is overlapping with other bookings.')
+            raise ValueError(
+                f'Cannot book slot with {self.user.username} The slot is overlapping with other bookings.'
+            )
         return True
 
     def is_overlapping_booking(self):
-        breakpoint()
         return Booking.objects.filter(
             Q(user=self.user) &
             Q(date=self.date),
-            Q(start_time__range=[self.start_time, self.end_time]) |
-            Q(end_time__range=[self.start_time, self.end_time])
+            Q(start_time__range=[self.start_time, self.end_time]) | Q(end_time__range=[self.start_time, self.end_time])
+            # Meeting time is a subset.
+            | (Q(start_time__lte=self.start_time) & Q(end_time__gte=self.end_time))
         ).exists()
+
+    def _end_time(self):
+        """Calculates & returns end time."""
+        return (
+                datetime.combine(self.date, self.start_time) + timedelta(minutes=self.total_time)
+        ).time()
+
+    def save(self, *args, **kwargs):
+        if not self.end_time:
+            self.end_time = self._end_time()
+        return super().save(*args, **kwargs)

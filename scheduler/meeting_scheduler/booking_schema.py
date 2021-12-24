@@ -33,7 +33,6 @@ class CreateBooking(graphene.Mutation):
 
     def mutate(cls, info, username, target_date, target_time, **kwargs):
         """Mutate operation creating booking for a user in the system."""
-        breakpoint()
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:

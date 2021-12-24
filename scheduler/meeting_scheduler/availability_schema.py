@@ -61,7 +61,6 @@ class UpdateAvailability(graphene.Mutation):
 
     def mutate(self, info, id, **kwargs):
         """mutate operation updating user availability in the system."""
-        breakpoint()
         try:
             availability = Availability.objects.get(id=id, user=info.context.user)
         except Availability.DoesNotExist:
