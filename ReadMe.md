@@ -43,6 +43,9 @@ Create and activate python3 virtual env.
 #### Run the server.  
 7. `python manage.py runserver`
 
+#### Run unit tests. 
+8. `pytest`
+
 ### Available GraphQL Endpoints
 1. Login endpoint
    1. login (mutation)
