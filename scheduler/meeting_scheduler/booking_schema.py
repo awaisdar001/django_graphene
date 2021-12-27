@@ -24,14 +24,18 @@ class CreateBooking(graphene.Mutation):
 
     class Arguments:
         """Defines the arguments the mutation can take."""
-        username = graphene.String()
-        full_name = graphene.String()
-        email = graphene.String()
-        target_date = graphene.Date()
-        target_time = graphene.Time()
-        total_time = graphene.Int()
+        username = graphene.String(
+            description="Provide Username for which the booking is being made.",
+            required=True
+        )
+        full_name = graphene.String(description="Provide your full name", required=True)
+        email = graphene.String(description="Provide your email", required=True)
+        target_date = graphene.Date(description="Provide the booking date", required=True)
+        target_time = graphene.Time(description="Provide the booking time", required=True)
+        total_time = graphene.Int(description="Provide the meeting interval", required=True)
 
-    def mutate(cls, info, username, target_date, target_time, **kwargs):
+    @classmethod
+    def mutate(cls, root, info, username, target_date, target_time, **kwargs):
         """Mutate operation creating booking for a user in the system."""
         try:
             user = User.objects.get(username=username)
@@ -52,10 +56,13 @@ class Query(graphene.ObjectType):
     """
     bookings_by_user = graphene.List(
         BookingNode,
-        username=graphene.String(required=True)
+        username=graphene.Argument(
+            graphene.String, description="Pass username of the user.", required=True
+        ),
     )
 
-    def resolve_bookings_by_user(self, info, username):
+    @classmethod
+    def resolve_bookings_by_user(cls, root, info, username):
         """Resolve bookings by user"""
         return Booking.objects.filter(user__username=username).prefetch_related('user')
 

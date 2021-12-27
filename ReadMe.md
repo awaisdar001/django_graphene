@@ -47,26 +47,27 @@ Create and activate python3 virtual env.
 8. `pytest`
 
 ### Available GraphQL Endpoints
-1. Login endpoint
-   1. login (mutation)
+1. User endpoints
+   1. `login` (mutation) Login & obtain token for the user
+   2. `verify_token` (mutation): Obtain JSON web token for given user.
 2. Availability endpoint
-   1. Create Availability (mutation)
-   2. Read All (your*) availabilities (query)
-   3. Read (your*) one availability (query)
-   4. Delete availability (mutation)
-   5. Update (your*) availability (mutation)
+   1. `api/availability:create_availability` Create Availability (mutation)
+   2. `api/availability:availabilities` Read All (your*) availabilities (query)
+   3. `api/availability:availability` Read (your*) one availability (query)
+   4. `api/availability:delete_availability` Delete availability (mutation)
+   5. `api/availability:update_availability` Update (your*) availability (mutation)
 3. Booking endpoint
-   1. Read bookings of users given their username
-   2. Create booking for users
+   1. `api/bookings:bookings_by_user` Read bookings of users given their username
+   2. `api/bookings:create_booking` Create booking for users
       1. Validation for overlapping booking
       2. Validation for availability exists
       3. Validation for booking already exists
 
-`*` => corresponds to logged in user.  
+`*` => corresponds to logged-in user.  
 #### 1. Login Endpoint
-* http://127.0.0.1:8000/users 
+* http://127.0.0.1:8000/api/users 
 
-This endpoint provides basic authtication for the app. Login mutation 
+This endpoint provides basic authentication for the app. Login mutation 
 is required for fetching the auth token and making API calls for private views such as creating 
 availabilities. 
 #### Example
@@ -76,7 +77,7 @@ mutation {
     success,
     errors,
     token,
-    user{
+    user {
       username
     }
   }
@@ -97,40 +98,32 @@ mutation {
   }
 }
 ```
-#### Error response
+
+#### 2. Verify user token
+* http://127.0.0.1:8000/api/user
+
 ```yaml
-{
-  "data": {
-    "login": {
-      "success": false,
-      "errors": {
-        "nonFieldErrors": [
-          {
-            "message": "Please, enter valid credentials.",
-            "code": "invalid_credentials"
-          }
-        ]
-      },
-      "token": null,
-      "user": null
-    }
+mutation{
+  verifyToken(token:"token") {
+    success
+    errors
   }
 }
 ```
 
-#### 2. Create Availability Endpoint
-* http://127.0.0.1:8000/availability
+#### 3. Create Availability Endpoint
+* http://127.0.0.1:8000/api/availability
 
-The `JWT` token will be used to create new availability. The token should be passed in 
-the request header `Authorization`. All queries to `/availability` endpoint are protected
-by authorization. 
+The `JWT` token will be used to create new availability. 
+The token should be passed in the request header Authorization. All queries to `/api/availability` endpoint 
+are protected by authorization. 
 
 #### Creating availability
 ```yaml
  mutation {
   createAvailability(
-    fromTime:"2022-08-17T09:00:00", 
-    toTime:"2022-08-17T05:00:00", 
+    availabilityFrom:"2022-08-17T09:00:00", 
+    availabilityTo:"2022-08-17T05:00:00", 
     timeIntervalMints:15
   ){
     success,
@@ -157,7 +150,7 @@ by authorization.
 #### Read all availabilities
 ```yaml
 query{
-  availabilities{
+  availabilities {
     id
     fromTime,
     toTime,
@@ -211,7 +204,6 @@ query{
   }
 }
 ```
-
 #### Delete availability
 ```yaml
 mutation {
@@ -220,35 +212,13 @@ mutation {
   }
 }
 ```
-#### Sucess response
+#### Success response
 ```yaml
 {
   "data": {
     "deleteAvailability": {
       "success": true
     }
-  }
-}
-```
-#### Error response
-```yaml
-{
-  "errors": [
-    {
-      "message": "Availability matching query does not exist.",
-      "locations": [
-        {
-          "line": 14,
-          "column": 3
-        }
-      ],
-      "path": [
-        "deleteAvailability"
-      ]
-    }
-  ],
-  "data": {
-    "deleteAvailability": null
   }
 }
 ```
@@ -284,10 +254,10 @@ mutation {
 }
 ```
 
-#### 3. Booking Endpoint
-* http://127.0.0.1:8000/booking
+#### 4. Booking Endpoint
+* http://127.0.0.1:8000/api/booking
 
-the booking endpoint can be used without login or providing `JWT` token. This endpoint
+The booking endpoint can be used **without** login or providing `JWT` auth token. This endpoint
 provides reading and booking user's availabilities. 
 
 #### Create booking
@@ -303,7 +273,7 @@ mutation{
     totalTime: 15,
   ){
     success,
-    booking{
+    booking {
       id
     }
   }
@@ -372,7 +342,7 @@ mutation{
 
 #### Read appointments of specific users.
 ```yaml
-query{
+query {
   bookingsByUser(username:"admin") {
     id
     fullName
@@ -380,6 +350,7 @@ query{
     date
     startTime
     endTime
+    totalTime
   }
 }
 
@@ -396,6 +367,7 @@ query{
         "date": "2021-01-14",
         "startTime": "11:30:00",
         "endTime": "11:45:00"
+        "totalTime": 15,
       }
     ]
   }
