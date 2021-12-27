@@ -6,9 +6,9 @@ from django.test import TestCase
 from scheduler.meeting_scheduler.models import Booking, UserModel, Availability
 
 
-class AppTests(TestCase):
-    def setUp(self) -> None:
-        self.robo1 = UserModel.objects.create(username='robo1', password='robo')
+class BaseTests(TestCase):
+    def create_user(self, username="robo1"):
+        return UserModel.objects.create(username=username, password="robo")
 
     def create_availability(self, user, from_time=None, to_time=None):
         """
@@ -23,14 +23,14 @@ class AppTests(TestCase):
             interval_mints=15,
         )
 
-    def create_booking(self, start_time=None, total_time=45):
+    def create_booking(self, user, start_time=None, total_time=45):
         """
         Create user booking today at 11:00am -- 11:45am
         """
         if not start_time:
             start_time = time(hour=11, minute=0, second=0)
         booking = Booking(
-            user=self.robo1,
+            user=user,
             full_name='DemoX',
             email='a@a.com',
             date=date.today(),
@@ -41,23 +41,28 @@ class AppTests(TestCase):
             booking.save()
             return booking
 
+
+class AppTests(BaseTests):
+    def setUp(self) -> None:
+        self.robo1 = self.create_user()
+
     def test_valid_booking(self):
         """Test that you can book new slots. """
         # create availability today from 11am to 11:45am
         self.create_availability(self.robo1)
         # create booking today at 11:00am -- 11:15am
-        self.create_booking(total_time=15)
+        self.create_booking(user=self.robo1, total_time=15)
         # create new booking at 11:16am -- 11:30am
-        self.create_booking(start_time=time(hour=11, minute=16), total_time=15)
+        self.create_booking(user=self.robo1, start_time=time(hour=11, minute=16), total_time=15)
 
     def test_valid_booking_in_past(self):
         """Test that you can book new slots in past."""
         # create availability today from 11am to 11:45am
         self.create_availability(self.robo1)
         # create new booking at 11:15am -- 11:30am
-        self.create_booking(start_time=time(hour=11, minute=15), total_time=15)
+        self.create_booking(user=self.robo1, start_time=time(hour=11, minute=15), total_time=15)
         # create new booking at 11:00am -- 11:14am
-        self.create_booking(start_time=time(hour=11, minute=00), total_time=14)
+        self.create_booking(user=self.robo1, start_time=time(hour=11, minute=00), total_time=14)
 
     def test_no_availability(self):
         """
@@ -65,7 +70,7 @@ class AppTests(TestCase):
         no availability available for user.
         """
         with self.assertRaises(ValueError) as value_error:
-            self.create_booking()
+            self.create_booking(user=self.robo1)
 
         self.assertEqual(
             str(value_error.exception),
@@ -75,9 +80,9 @@ class AppTests(TestCase):
     def test_already_booked_same_user(self):
         """Tests that user can not book already booked slot."""
         self.create_availability(self.robo1)
-        self.create_booking()
+        self.create_booking(user=self.robo1)
         with self.assertRaises(ValueError) as value_error:
-            self.create_booking()
+            self.create_booking(user=self.robo1)
 
         self.assertEqual(
             str(value_error.exception),
@@ -87,12 +92,12 @@ class AppTests(TestCase):
     def test_overlapping_booking(self):
         """Tests that validation fails when we try to book an overlapping slot."""
         self.create_availability(self.robo1)
-        self.create_booking()
+        self.create_booking(user=self.robo1)
         today_date = date.today()
         # test 20 random cases.
         for case in range(1, 20):
             random_min = random.randint(1, 44)
-            random_second = random.randint(1, 60)
+            random_second = random.randint(1, 59)
 
             new_booking = Booking(
                 user=self.robo1,
