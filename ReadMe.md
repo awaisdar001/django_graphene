@@ -97,7 +97,7 @@ mutation {
 ```
 
 #### 2. Verify user token
-* http://127.0.0.1:8000/api/user
+* http://127.0.0.1:8000/api/users
 
 ```yaml
 mutation{
