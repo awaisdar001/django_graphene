@@ -48,14 +48,14 @@ Create and activate python3 virtual env.
    1. `login` (mutation) Login & obtain token for the user
    2. `verify_token` (mutation): Obtain JSON web token for given user.
 2. Availability endpoint
-   1. Create Availability (mutation)
-   2. Read All (your*) availabilities (query)
-   3. Read (your*) one availability (query)
-   4. Delete availability (mutation)
-   5. Update (your*) availability (mutation)
+   1. `api/availability:create_availability` Create Availability (mutation)
+   2. `api/availability:availabilities` Read All (your*) availabilities (query)
+   3. `api/availability:availability` Read (your*) one availability (query)
+   4. `api/availability:delete_availability` Delete availability (mutation)
+   5. `api/availability:update_availability` Update (your*) availability (mutation)
 3. Booking endpoint
-   1. Read bookings of users given their username
-   2. Create booking for users
+   1. `api/bookings:bookings_by_user` Read bookings of users given their username
+   2. `api/bookings:create_booking` Create booking for users
       1. Validation for overlapping booking
       2. Validation for availability exists
       3. Validation for booking already exists
@@ -251,7 +251,7 @@ mutation {
 }
 ```
 
-#### 3. Booking Endpoint
+#### 4. Booking Endpoint
 * http://127.0.0.1:8000/api/booking
 
 The booking endpoint can be used **without** login or providing `JWT` auth token. This endpoint
