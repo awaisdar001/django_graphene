@@ -1,7 +1,10 @@
+"""Availability schema"""
 import graphene
 from graphene_django import DjangoObjectType
 from graphql import GraphQLError
+from graphql_jwt.decorators import user_passes_test
 
+from scheduler.meeting_scheduler.decorators import user_required
 from scheduler.meeting_scheduler.models import Availability
 from scheduler.meeting_scheduler.user_schema import UserType
 
@@ -34,6 +37,7 @@ class CreateAvailability(graphene.Mutation):
     """
     availability = graphene.Field(AvailabilityNode)
     success = graphene.Boolean()
+    error = graphene.String()
 
     class Arguments:
         """Defines the arguments the mutation can take."""
@@ -42,6 +46,7 @@ class CreateAvailability(graphene.Mutation):
         time_interval_mints = graphene.Int(description=Description.time_interval, required=True)
 
     @classmethod
+    @user_required
     def mutate(cls, root, info, availability_from, availability_to, time_interval_mints):
         """Mutate operation creating user availability in the system."""
         user = info.context.user
@@ -60,6 +65,7 @@ class UpdateAvailability(graphene.Mutation):
     """
     availability = graphene.Field(AvailabilityNode)
     success = graphene.Boolean()
+    error = graphene.String()
 
     class Arguments:
         """Defines the arguments the mutation can take."""
@@ -71,6 +77,7 @@ class UpdateAvailability(graphene.Mutation):
         time_interval_mints = graphene.Int(description=Description.time_interval)
 
     @classmethod
+    @user_required
     def mutate(cls, root, info, id, **kwargs):
         """Mutate operation updating user availability in the system."""
         try:
@@ -92,17 +99,19 @@ class DeleteAvailability(graphene.Mutation):
     OTD mutation class for deleting user availabilities.
     """
     success = graphene.Boolean(description="Boolean indicating the status of the deletion.")
+    error = graphene.String(required=False)
 
     class Arguments:
         """Defines the arguments the mutation can take."""
         id = graphene.ID()
 
     @classmethod
+    @user_required
     def mutate(cls, root, info, id):
         """Mutate operation deleting user availability in the system."""
         obj = Availability.objects.get(pk=id, user=info.context.user)
         obj.delete()
-        return DeleteAvailability(success=True)
+        return cls(success=True, error=None)
 
 
 class Query(graphene.ObjectType):
@@ -115,11 +124,13 @@ class Query(graphene.ObjectType):
     ))
 
     @classmethod
+    @user_passes_test(lambda user: user and not user.is_anonymous)
     def resolve_availabilities(cls, root, info):
         """Resolve the user availabilities List"""
         return Availability.objects.filter(user=info.context.user)
 
     @classmethod
+    @user_passes_test(lambda user: user and not user.is_anonymous)
     def resolve_availability(cls, root, info, id):
         """Resolve the user availability field"""
         return Availability.objects.get(id=id, user=info.context.user)

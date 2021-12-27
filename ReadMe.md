@@ -226,7 +226,7 @@ mutation {
 #### Update Availability
 ```yaml
 mutation {
-  updateAvailability(id:1, fromTime:"2021-01-14T09:00:00", toTime: "2021-01-14T05:00:00"){
+  updateAvailability(id:1, availabilityFrom:"2021-01-14T09:00:00", availabilityTo: "2021-01-14T05:00:00"){
     availability{
       id
       fromTime

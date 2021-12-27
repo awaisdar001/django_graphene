@@ -12,7 +12,7 @@ class UserType(DjangoObjectType):
 
     class Meta:
         model = UserModel
-        fields = ("id", "username")
+        fields = ("id", "username", "email")
 
 
 class Query(UserQuery, graphene.ObjectType):
