@@ -14,3 +14,4 @@ load:
 	python manage.py loaddata ./scheduler/meeting_scheduler/factories/users.json
 
 setup: requirements migrate load
+
