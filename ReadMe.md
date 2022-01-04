@@ -378,4 +378,4 @@ query {
 
 
 ******
-####** Protected by JWT authentication token which should be provided in the request header.
+#### ** Protected by JWT authentication token which should be provided in the request header.
