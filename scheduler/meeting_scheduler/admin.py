@@ -1,3 +1,6 @@
+"""
+Scheduler app admin configurations.
+"""
 from django.apps import apps
 from django.contrib import admin
 from django.contrib.sessions.models import Session
@@ -6,7 +9,9 @@ from scheduler.meeting_scheduler.models import Booking, Availability, UserModel 
 
 
 class SessionAdmin(admin.ModelAdmin):
+    """Django session model admin """
     def _session_data(self, obj):
+        """Return decoded session data."""
         return obj.get_decoded()
 
     list_display = ['session_key', '_session_data', 'expire_date']
@@ -16,7 +21,7 @@ admin.site.register(Session, SessionAdmin)
 
 
 class BookingsAdmin(admin.ModelAdmin):
-    """Bookings admin model"""
+    """Bookings admin model."""
     readonly_fields = ('end_time',)
     list_display = ('full_name', 'email', 'date', 'start_time', 'end_time', 'total_time',)
 

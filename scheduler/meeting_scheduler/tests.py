@@ -1,3 +1,4 @@
+"""Meeting scheduler model tests"""
 import random
 from datetime import date, time, datetime
 

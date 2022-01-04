@@ -23,54 +23,59 @@ testing GraphQL queries. Follow the step by step guide below to run & test the G
 <img width="1371" alt="Screen Shot 2021-12-24 at 3 25 55 AM" src="https://user-images.githubusercontent.com/4252738/147296260-1f2f256b-3cb7-4fe7-88b3-bc6121cfe7f5.png">
 
 ### Getting Started 
+This project is created and tested with `Python 3.8.10`
 
-#### Create virtual Env
-Create and activate python3 virtual env. 
+#### Create & activate virtual environment.
+Create and activate python3.8 virtual env. 
 * `python3 -m venv ./venv`
 
 * `source venv/bin/activate`
-#### Run requirements
-* `pip install -r requirements.txt`
-#### Migrate the database
-* `python manage.py migrate`
 
-#### Load users in the database 
-* `python manage.py loaddata scheduler/meeting_scheduler/factories/users.json`
+#### Setup devstack
+The next step is to set up the devstack by running the following `make` command. If the `make` command fails for you
+try the alternative. 
+
+* `make setup`
+
+**OR**
+* `pip install -r requirements.txt`
+* `python manage.py migrate`
+* `python manage.py loaddata ./scheduler/meeting_scheduler/factories/users.json`
 
 #### Create superuser 
 * `python manage.py createsuperuser`
 
 #### Run the server.  
-7. `python manage.py runserver`
+* `make run` **OR** `python manage.py runserver`
+
 
 #### Run unit tests. 
-8. `pytest`
+`make test` **OR** `pytest`
 
 ### Available GraphQL Endpoints
 1. User endpoints
-   1. `login` (mutation) Login & obtain token for the user
-   2. `verify_token` (mutation): Obtain JSON web token for given user.
-2. Availability endpoint
-   1. `api/availability:create_availability` Create Availability (mutation)
-   2. `api/availability:availabilities` Read All (your*) availabilities (query)
-   3. `api/availability:availability` Read (your*) one availability (query)
-   4. `api/availability:delete_availability` Delete availability (mutation)
-   5. `api/availability:update_availability` Update (your*) availability (mutation)
-3. Booking endpoint
-   1. `api/bookings:bookings_by_user` Read bookings of users given their username
-   2. `api/bookings:create_booking` Create booking for users
+   1. `api/graphql:login` (mutation) Login & obtain token for the user
+   2. `api/graphql:verify_token` (mutation): Obtain JSON web token for given user.
+2. Availability endpoints
+   1. `api/graphql:create_availability` Create Availability (mutation)
+   2. `api/graphql:availabilities` Read All (your*) availabilities (query)
+   3. `api/graphql:availability` Read (your*) one availability (query)
+   4. `api/graphql:delete_availability` Delete availability (mutation)
+   5. `api/graphql:update_availability` Update (your*) availability (mutation)
+3. Booking endpoints
+   1. `api/graphql:bookings_by_user` Read bookings of users given their username
+   2. `api/graphql:create_booking` Create booking for users
       1. Validation for overlapping booking
       2. Validation for availability exists
       3. Validation for booking already exists
 
-`*` => corresponds to logged-in user.  
-#### 1. Login Endpoint
-* http://127.0.0.1:8000/api/users 
+#### 1. Login
+* http://127.0.0.1:8000/api/graphql 
 
 This endpoint provides basic authentication for the app. Login mutation 
 is required for fetching the auth token and making API calls for private views such as creating 
 availabilities. 
-#### Example
+#### Login Example
 ```yaml
 mutation {
   login(username:"admin", password:"admin"){
@@ -99,8 +104,8 @@ mutation {
 }
 ```
 
-#### 2. Verify user token
-* http://127.0.0.1:8000/api/users
+#### 2. Verify logged in user auth token
+* http://127.0.0.1:8000/api/graphql
 
 ```yaml
 mutation{
@@ -111,14 +116,12 @@ mutation{
 }
 ```
 
-#### 3. Create Availability Endpoint
-* http://127.0.0.1:8000/api/availability
+#### 3. Create availability **
+* http://127.0.0.1:8000/api/graphql
 
 The `JWT` token will be used to create new availability. 
-The token should be passed in the request header Authorization. All queries to `/api/availability` endpoint 
-are protected by authorization. 
+The token should be passed in the request header Authorization. 
 
-#### Creating availability
 ```yaml
  mutation {
   createAvailability(
@@ -133,7 +136,7 @@ are protected by authorization.
   }
 }
 ```
-#### Success Response
+#### Success response
 ```yaml
 {
   "data": {
@@ -147,7 +150,7 @@ are protected by authorization.
 }
 ```
 
-#### Read all availabilities
+#### Read all availabilities **
 ```yaml
 query{
   availabilities {
@@ -158,7 +161,7 @@ query{
   }
 }
 ```
-#### Success Response
+#### Success response
 ```yaml
 {
   "data": {
@@ -180,7 +183,7 @@ query{
 }
 ```
 
-#### Read one availability
+#### Read one availability ** 
 ```yaml
 query{
   availability(id:2){
@@ -191,7 +194,7 @@ query{
   }
 }
 ```
-#### Success Response
+#### Success response
 ```yaml
 {
   "data": {
@@ -204,7 +207,7 @@ query{
   }
 }
 ```
-#### Delete availability
+#### Delete one availability ** 
 ```yaml
 mutation {
   deleteAvailability(id:2) {
@@ -223,7 +226,7 @@ mutation {
 }
 ```
 
-#### Update Availability
+#### Update one availability **
 ```yaml
 mutation {
   updateAvailability(id:1, availabilityFrom:"2021-01-14T09:00:00", availabilityTo: "2021-01-14T05:00:00"){
@@ -255,14 +258,13 @@ mutation {
 ```
 
 #### 4. Booking Endpoint
-* http://127.0.0.1:8000/api/booking
+* http://127.0.0.1:8000/api/graphql
 
-The booking endpoint can be used **without** login or providing `JWT` auth token. This endpoint
-provides reading and booking user's availabilities. 
+The booking queries can be used **without** login or providing `JWT` auth token. These quries
+provide reading and booking user's availabilities. 
 
 #### Create booking
 ```yaml
-
 mutation{
   createBooking(
     email: "a@a.com"
@@ -373,3 +375,7 @@ query {
   }
 }
 ```
+
+
+******
+####** Protected by JWT authentication token which should be provided in the request header.

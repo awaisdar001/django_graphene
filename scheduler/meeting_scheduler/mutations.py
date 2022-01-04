@@ -1,34 +1,49 @@
-"""Availability schema"""
+"""
+Scheduler app mutations
+"""
+
 import graphene
-from graphene_django import DjangoObjectType
 from graphql import GraphQLError
-from graphql_jwt.decorators import user_passes_test
 
 from scheduler.meeting_scheduler.decorators import user_required
-from scheduler.meeting_scheduler.models import Availability
-from scheduler.meeting_scheduler.user_schema import UserType
+from scheduler.meeting_scheduler.enums import Description
+from scheduler.meeting_scheduler.models import Booking, UserModel as User, Availability
+from scheduler.meeting_scheduler.nodes import BookingNode, AvailabilityNode
 
 
-class Description:
-    """Verbose descriptions for availability fields. """
-    availability_from = "Provide iso datetime for the start of the availability e.g. 2022-08-17T09:00:00"
-    availability_to = "Provide iso datetime for your availability limit e.g. 2022-08-17T06:00:00"
-    time_interval = "Provide a how much time user can book at max. e.g. 15"
+class CreateBooking(graphene.Mutation):
+    """
+    OTD mutation class for creating bookings with users.
+    """
+    booking = graphene.Field(BookingNode)
+    success = graphene.Boolean()
 
-
-class AvailabilityNode(DjangoObjectType):
-    """Availability Object Type Definition"""
-    id = graphene.ID()
-    interval_mints = graphene.String()
-    user = graphene.Field(UserType)
-
-    class Meta:
-        model = Availability
+    class Arguments:
+        """Defines the arguments the mutation can take."""
+        username = graphene.String(
+            description="Provide Username for which the booking is being made.",
+            required=True
+        )
+        full_name = graphene.String(description="Provide your full name", required=True)
+        email = graphene.String(description="Provide your email", required=True)
+        target_date = graphene.Date(description="Provide the booking date", required=True)
+        target_time = graphene.Time(description="Provide the booking time", required=True)
+        total_time = graphene.Int(description="Provide the meeting interval", required=True)
 
     @classmethod
-    def resolve_interval_mints(cls, availability, info):
-        """Resolves interval mints choice field."""
-        return availability.get_interval_mints_display()
+    def mutate(cls, root, info, username, target_date, target_time, **kwargs):
+        """Mutate operation creating booking for a user in the system."""
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise GraphQLError(f"{username} does not exist.")
+
+        booking = Booking(user=user, date=target_date, start_time=target_time, **kwargs)
+        if booking.is_valid_new_booking():
+            booking.save()
+            return CreateBooking(booking=booking, success=True)
+
+        GraphQLError("Booking information is not valid.")
 
 
 class CreateAvailability(graphene.Mutation):
@@ -112,37 +127,3 @@ class DeleteAvailability(graphene.Mutation):
         obj = Availability.objects.get(pk=id, user=info.context.user)
         obj.delete()
         return cls(success=True, error=None)
-
-
-class Query(graphene.ObjectType):
-    """
-    Describes entry point for fields to *read* data in the user availability Schema.
-    """
-    availabilities = graphene.List(AvailabilityNode)
-    availability = graphene.Field(AvailabilityNode, id=graphene.Int(
-        required=True, description="ID of a availability to view"
-    ))
-
-    @classmethod
-    @user_passes_test(lambda user: user and not user.is_anonymous)
-    def resolve_availabilities(cls, root, info):
-        """Resolve the user availabilities List"""
-        return Availability.objects.filter(user=info.context.user)
-
-    @classmethod
-    @user_passes_test(lambda user: user and not user.is_anonymous)
-    def resolve_availability(cls, root, info, id):
-        """Resolve the user availability field"""
-        return Availability.objects.get(id=id, user=info.context.user)
-
-
-class Mutation(graphene.ObjectType):
-    """
-    Describes entry point for fields to *create, update or delete* data in availability API.
-    """
-    create_availability = CreateAvailability.Field()
-    update_availability = UpdateAvailability.Field()
-    delete_availability = DeleteAvailability.Field()
-
-
-schema = graphene.Schema(query=Query, mutation=Mutation)
