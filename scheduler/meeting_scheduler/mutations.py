@@ -5,10 +5,10 @@ Scheduler app mutations
 import graphene
 from graphql import GraphQLError
 
-from scheduler.meeting_scheduler.decorators import user_required
-from scheduler.meeting_scheduler.enums import Description
-from scheduler.meeting_scheduler.models import Booking, UserModel as User, Availability
-from scheduler.meeting_scheduler.nodes import BookingNode, AvailabilityNode
+from .decorators import user_required
+from .enums import Description
+from .models import Booking, UserModel as User, Availability
+from .nodes import BookingNode, AvailabilityNode
 
 
 class CreateBooking(graphene.Mutation):

@@ -5,11 +5,12 @@ from django.apps import apps
 from django.contrib import admin
 from django.contrib.sessions.models import Session
 
-from scheduler.meeting_scheduler.models import Booking, Availability, UserModel as User
+from .models import Booking, Availability, UserModel as User
 
 
 class SessionAdmin(admin.ModelAdmin):
     """Django session model admin """
+
     def _session_data(self, obj):
         """Return decoded session data."""
         return obj.get_decoded()

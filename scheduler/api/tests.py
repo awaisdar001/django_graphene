@@ -3,7 +3,7 @@ Booking graphql api tests
 """
 from datetime import time
 
-from scheduler.meeting_scheduler.schema import schema
+from .schema import schema
 from scheduler.meeting_scheduler.tests import BaseTests
 
 

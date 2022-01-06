@@ -5,7 +5,7 @@ Custom scheduler app nodes
 import graphene
 from graphene_django import DjangoObjectType
 
-from scheduler.meeting_scheduler.models import Booking, Availability, UserModel
+from .models import Booking, Availability, UserModel
 
 
 class UserType(DjangoObjectType):
