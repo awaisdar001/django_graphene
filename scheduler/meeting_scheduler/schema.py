@@ -21,9 +21,9 @@ class Query(UserQuery, graphene.ObjectType):
 
     bookings_by_user = graphene.List(
         BookingNode,
-        username=graphene.Argument(
-            graphene.String, description="Pass username of the user.", required=True
-        ),
+        username=graphene.String(required=True),
+        # Alternative
+        # username=graphene.Argument(graphene.String, description="Pass username of the user.", required=True),
     )
 
     @classmethod
