@@ -8,14 +8,14 @@ from graphql import GraphQLError
 from .decorators import user_required
 from .enums import Description
 from .models import Booking, UserModel as User, Availability
-from .nodes import BookingNode, AvailabilityNode
+from .types import BookingType, AvailabilityType
 
 
 class CreateBooking(graphene.Mutation):
     """
     OTD mutation class for creating bookings with users.
     """
-    booking = graphene.Field(BookingNode)
+    booking = graphene.Field(BookingType)
     success = graphene.Boolean()
 
     class Arguments:
@@ -50,7 +50,7 @@ class CreateAvailability(graphene.Mutation):
     """
     OTD mutation class for creating user availabilities.
     """
-    availability = graphene.Field(AvailabilityNode)
+    availability = graphene.Field(AvailabilityType)
     success = graphene.Boolean()
     error = graphene.String()
 
@@ -78,7 +78,7 @@ class UpdateAvailability(graphene.Mutation):
     """
     OTD mutation class for updating user availabilities.
     """
-    availability = graphene.Field(AvailabilityNode)
+    availability = graphene.Field(AvailabilityType)
     success = graphene.Boolean()
     error = graphene.String()
 

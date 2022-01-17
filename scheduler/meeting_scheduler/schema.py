@@ -7,7 +7,7 @@ from .models import Booking, Availability
 from .mutations import (
     CreateBooking, CreateAvailability, DeleteAvailability, UpdateAvailability,
 )
-from .nodes import AvailabilityNode, BookingNode
+from .types import AvailabilityType, BookingType
 
 
 class BookingQuery(graphene.ObjectType):
@@ -15,7 +15,7 @@ class BookingQuery(graphene.ObjectType):
     Describes entry point for fields to *read* data in the booking schema.
     """
     bookings_by_user = graphene.List(
-        BookingNode,
+        BookingType,
         username=graphene.String(required=True),
         # Alternative
         # username=graphene.Argument(graphene.String, description="Pass username of the user.", required=True),
@@ -31,8 +31,8 @@ class AvailabilityQuery(UserQuery, graphene.ObjectType):
     """
     Describes entry point for fields to *read* data in the availability schema.
     """
-    availabilities = graphene.List(AvailabilityNode)
-    availability = graphene.Field(AvailabilityNode, id=graphene.Int(
+    availabilities = graphene.List(AvailabilityType)
+    availability = graphene.Field(AvailabilityType, id=graphene.Int(
         required=True, description="ID of a availability to view"
     ))
 

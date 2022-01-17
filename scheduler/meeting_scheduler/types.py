@@ -1,7 +1,6 @@
 """
 Custom scheduler app nodes
 """
-
 import graphene
 from graphene_django import DjangoObjectType
 
@@ -16,7 +15,7 @@ class UserType(DjangoObjectType):
         fields = ("id", "username", "email")
 
 
-class AvailabilityNode(DjangoObjectType):
+class AvailabilityType(DjangoObjectType):
     """Availability Object Type Definition"""
     id = graphene.ID()
     interval_mints = graphene.String()
@@ -31,7 +30,7 @@ class AvailabilityNode(DjangoObjectType):
         return availability.get_interval_mints_display()
 
 
-class BookingNode(DjangoObjectType):
+class BookingType(DjangoObjectType):
     """Booking Object Type Definition"""
     id = graphene.ID()
     user = graphene.Field(UserType)

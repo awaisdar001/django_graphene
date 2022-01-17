@@ -1,10 +1,20 @@
-# Django Graphene (GraphQL) API
+# Schedule Booking GraphQL API
 
-This is simple application which provided CURD operation. The application has simple
-data flow where authenticated users can create their availabilities slots and 
-other users can book these slots. Other uses can also see all the bookings of a user. 
-CURD ops are provided on authenticated availability endpoint using `JWT` authentication
-mechanism.
+Schedule Booking app is powered by a GraphQL API. GraphQL is a query language that allows clients to talk to an API server. Unlike REST, it gives the client control over how much or how little data they want to request about each object and allows relations within the object graph to be traversed easily.
+
+To learn more about GraphQL language and its concepts, see the official [GraphQL website](https://graphql.org/).
+
+The API endpoint is available at `/graphql/` and requires queries to be submitted using HTTP `POST` method and the `application/json` content type.
+
+The API provides simple CURD operation. The application has simple data flow where 
+authenticated users can create their availabilities slots and other users can 
+book these slots. Other uses can also see all the bookings of a user. 
+CURD operations are provided on authenticated availability endpoint using `JWT` authentication
+mechanism. API provides both types of operations:
+
+* Public (search & book slots in availability.)
+* Private (create/update/delete availabilities)
+
 
 **Project Requirements:**
 
@@ -22,7 +32,7 @@ testing GraphQL queries. Follow the step by step guide below to run & test the G
 
 <img width="1371" alt="Screen Shot 2021-12-24 at 3 25 55 AM" src="https://user-images.githubusercontent.com/4252738/147296260-1f2f256b-3cb7-4fe7-88b3-bc6121cfe7f5.png">
 
-### Getting Started 
+### Development Setup 
 This project is created and tested with `Python 3.8.10`
 
 #### Create & activate virtual environment.
