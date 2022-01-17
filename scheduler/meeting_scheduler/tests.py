@@ -4,7 +4,7 @@ from datetime import date, time, datetime
 
 from django.test import TestCase
 
-from scheduler.meeting_scheduler.models import Booking, UserModel, Availability
+from .models import Booking, UserModel, Availability
 
 
 class BaseTests(TestCase):
