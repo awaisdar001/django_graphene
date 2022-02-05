@@ -3,8 +3,10 @@ Booking graphql api tests
 """
 from datetime import time
 
-from .schema import schema
+from graphql_relay import to_global_id
+
 from scheduler.meeting_scheduler.tests import BaseTests
+from .schema import schema
 
 
 class BookingAPITests(BaseTests):
@@ -24,9 +26,13 @@ class BookingAPITests(BaseTests):
 
         self.booking_by_user_query = '''
             query getUserBookings($username: String!) {
-              bookingsByUser(username: $username){
-                id user {
-                  id username email
+              bookings(username: $username){
+                edges {
+                  node {
+                    id user {
+                      id username email    
+                    }
+                  }
                 }
               }
             }
@@ -62,17 +68,37 @@ class BookingAPITests(BaseTests):
         )
 
         assert data is not None
-        assert len(data['bookingsByUser']) == 1
+        assert len(data['bookings']) == 1
 
     def test_user_booking_fields(self):
         """Test that get user booking api returns expected data."""
-        booking = self.execute_and_assert_success(
+        bookings = self.execute_and_assert_success(
             self.booking_by_user_query,
             variables={"username": "api-user"}
-        )['bookingsByUser'][0]
+        )['bookings']['edges']
 
-        assert booking['id'] == f'{self.user_booking.id}'
+        booking = bookings[0].get('node')
+        assert booking['id'] == to_global_id("BookingType", self.user_booking.id)
         assert booking['user'] == {'id': f'{self.user.id}', 'username': 'api-user', 'email': self.user.email}
+
+    def test_empty_filter_value(self):
+        """"""
+        query = '''
+            query getUserBookings($username: String) {
+              bookings(username: $username) {
+                edges {
+                  node {
+                    id fullName email date startTime endTime totalTime updatedAt
+                    user {
+                      id username email
+                    }
+                  }
+                }
+              }
+            }
+        '''
+        data = self.execute_and_assert_success(query)
+        assert data is not None
 
     def test_user_booking_additional_fields(self):
         """
@@ -80,37 +106,28 @@ class BookingAPITests(BaseTests):
         returns those additional fields.
         """
         query = '''
-            query getUserBookings($username: String!) {
-              bookingsByUser(username: $username){
-                id fullName email date startTime endTime totalTime updatedAt
-                user {
-                  id username email
+            query getUserBookings($username: String) {
+              bookings(username: $username) {
+                edges {
+                  node {
+                    id fullName email date startTime endTime totalTime updatedAt
+                    user {
+                      id username email
+                    }
+                  }
                 }
               }
             }
         '''
-        booking = self.execute_and_assert_success(
+        bookings = self.execute_and_assert_success(
             query,
             variables={"username": "api-user"}
-        )['bookingsByUser'][0]
+        )['bookings']['edges']
 
-        for field in "id fullName email date startTime endTime totalTime updatedAt".split():
-            assert field in booking
-
-    def test_variable_error(self):
-        """"""
-        query = '''
-            query getUserBookings($username: String) {
-              bookingsByUser(username: $username){
-                id fullName email date startTime endTime totalTime updatedAt
-                user {
-                  id username email
-                }
-              }
-            }
-        '''
-        expected_error = 'Variable "username" of type "String" used in position expecting type "String!".'
-        self.execute_and_assert_error(query=query, variables={"username": "api-user"}, error=expected_error)
+        for edge in bookings:
+            booking = edge.get('node')
+            for field in "id fullName email date startTime endTime totalTime updatedAt".split():
+                assert field in booking
 
     def test_missing_variable(self):
         """
