@@ -164,39 +164,49 @@ The token should be passed in the request header Authorization. e.g. `{"Authoriz
 ```yaml
 query{
   availabilities {
-    id
-    fromTime,
-    toTime,
-    intervalMints
+    edges {
+      node {
+        id
+    	fromTime,
+    	toTime,
+    	intervalMints
+      }
+    }
   }
 }
 ```
 #### Success response
 ```yaml
 {
-  "data": {
-    "availabilities": [
-      {
-        "id": "1",
-        "fromTime": "2022-08-16T09:00:00+00:00",
-        "toTime": "2022-08-16T05:00:00+00:00",
-        "intervalMints": "Fifteen (15) mints"
-      },
-      {
-        "id": "2",
-        "fromTime": "2022-08-17T09:00:00+00:00",
-        "toTime": "2022-08-17T05:00:00+00:00",
-        "intervalMints": "Fifteen (15) mints"
+   "data": {
+      "availabilities": {
+         "edges": [
+            {
+               "node": {
+                  "id": "QXZhaWxhYmlsaXR5VHlwZTox",
+                  "fromTime": "2021-01-14T09:00:00",
+                  "toTime": "2021-01-14T05:00:00",
+                  "intervalMints": "Thirty (30) mints"
+               }
+            },
+            {
+               "node": {
+                  "id": "QXZhaWxhYmlsaXR5VHlwZToz",
+                  "fromTime": "2022-08-21T09:00:00",
+                  "toTime": "2022-08-21T09:00:00",
+                  "intervalMints": "Thirty (30) mints"
+               }
+            },
+         ]
       }
-    ]
-  }
+   }
 }
 ```
 
 #### Read one availability ** 
 ```yaml
 query{
-  availability(id:2){
+  availability(id:"QXZhaWxhYmlsaXR5VHlwZTox"){
     id,
     fromTime
     toTime
@@ -209,7 +219,7 @@ query{
 {
   "data": {
     "availability": {
-      "id": "2",
+      "id": "QXZhaWxhYmlsaXR5VHlwZTox",
       "fromTime": "2022-08-17T09:00:00+00:00",
       "toTime": "2022-08-17T05:00:00+00:00",
       "intervalMints": "Fifteen (15) mints"
@@ -220,8 +230,9 @@ query{
 #### Delete one availability ** 
 ```yaml
 mutation {
-  deleteAvailability(id:2) {
+  deleteAvailability(id:"QXZhaWxhYmlsaXR5VHlwZTox") {
     success
+    error
   }
 }
 ```
@@ -231,6 +242,7 @@ mutation {
   "data": {
     "deleteAvailability": {
       "success": true
+      "error": null
     }
   }
 }
@@ -239,7 +251,7 @@ mutation {
 #### Update one availability **
 ```yaml
 mutation {
-  updateAvailability(id:1, availabilityFrom:"2021-01-14T09:00:00", availabilityTo: "2021-01-14T05:00:00"){
+  updateAvailability(id:"QXZhaWxhYmlsaXR5VHlwZTox", availabilityFrom:"2021-01-14T09:00:00", availabilityTo: "2021-01-14T05:00:00"){
     availability{
       id
       fromTime
@@ -247,6 +259,7 @@ mutation {
       intervalMints
     }
     success,
+    error
   }
 }
 ```
@@ -262,6 +275,7 @@ mutation {
         "intervalMints": "Fifteen (15) mints"
       },
       "success": true
+      "error": null
     }
   }
 }
@@ -345,7 +359,7 @@ mutation{
     "createBooking": {
       "success": true,
       "booking": {
-        "id": "1"
+        "id": "Qm9va2luZ1R5cGU6NA=="
       }
     }
   }
@@ -355,34 +369,51 @@ mutation{
 #### Read appointments of specific users.
 ```yaml
 query {
-  bookingsByUser(username:"admin") {
-    id
-    fullName
-    email
-    date
-    startTime
-    endTime
-    totalTime
+  bookings(username:"admin") {
+    edges {
+      node {
+        id
+        fullName
+        email
+        date
+        startTime
+        endTime
+        totalTime
+      }
+    }
   }
 }
 
 ```
 #### Success response
 ```yaml
-{
-  "data": {
-    "bookingsByUser": [
-      {
-        "id": "1",
-        "fullName": "Demo",
-        "email": "a@a.com",
-        "date": "2021-01-14",
-        "startTime": "11:30:00",
-        "endTime": "11:45:00"
-        "totalTime": 15,
-      }
-    ]
-  }
+"data": {
+   "bookings": {
+      "edges": [
+         {
+            "node": {
+               "id": "Qm9va2luZ1R5cGU6MQ==",
+               "fullName": "Awa",
+               "email": "a@a.com",
+               "date": "2021-12-17",
+               "startTime": "11:30:00",
+               "endTime": "11:45:00",
+               "totalTime": 15
+            }
+         },
+         {
+            "node": {
+               "id": "Qm9va2luZ1R5cGU6Mg==",
+               "fullName": "Demo",
+               "email": "a@a.com",
+               "date": "2021-12-23",
+               "startTime": "11:30:00",
+               "endTime": "11:45:00",
+               "totalTime": 15
+            }
+         },
+      ]
+   }
 }
 ```
 

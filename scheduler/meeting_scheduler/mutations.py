@@ -4,6 +4,7 @@ Scheduler app mutations
 
 import graphene
 from graphql import GraphQLError
+from graphql_relay import from_global_id
 
 from .decorators import user_required
 from .enums import Description
@@ -84,7 +85,7 @@ class UpdateAvailability(graphene.Mutation):
 
     class Arguments:
         """Defines the arguments the mutation can take."""
-        id = graphene.Int(required=True, description="ID of a availability to update.")
+        id = graphene.String(required=True, description="ID of a availability to update.")
         availability_from = graphene.DateTime(
             description=Description.availability_from,
         )
@@ -95,18 +96,28 @@ class UpdateAvailability(graphene.Mutation):
     @user_required
     def mutate(cls, root, info, id, **kwargs):
         """Mutate operation updating user availability in the system."""
+        _, _id = from_global_id(id)
         try:
-            availability = Availability.objects.get(id=id, user=info.context.user)
+            availability = Availability.objects.get(id=_id, user=info.context.user)
         except Availability.DoesNotExist:
             raise GraphQLError(f"This ID:{id} doesn't seem to be belong you!")
-        key_mapping = {"availability_from": "from_time", "availability_to": "to_time",
-                       "time_interval_mints": "interval_mints"}
-        for key, mapping in key_mapping.items():
-            if not kwargs.get(key):
-                continue
-            setattr(availability, mapping, kwargs.get(key))
-        availability.save()
+
+        availability = cls.perform_update(availability, **kwargs)
         return UpdateAvailability(availability=availability, success=True)
+
+    @classmethod
+    def perform_update(cls, availability, **kwargs):
+        """Updates the availability instance."""
+        db_fields = ["from_time", "to_time", "interval_mints"]
+        api_fields = ["availability_from", "availability_to", "time_interval_mints"]
+        key_mapping = zip(db_fields, api_fields)
+
+        for db_key, api_key in key_mapping:
+            if not kwargs.get(api_key):
+                continue
+            setattr(availability, db_key, kwargs.get(api_key))
+        availability.save(update_fields=db_fields)
+        return availability
 
 
 class DeleteAvailability(graphene.Mutation):
@@ -118,12 +129,12 @@ class DeleteAvailability(graphene.Mutation):
 
     class Arguments:
         """Defines the arguments the mutation can take."""
-        id = graphene.ID()
+        id = graphene.String()
 
     @classmethod
     @user_required
     def mutate(cls, root, info, id):
         """Mutate operation deleting user availability in the system."""
-        obj = Availability.objects.get(pk=id, user=info.context.user)
-        obj.delete()
+        _, _id = from_global_id(id)
+        Availability.objects.get(pk=_id, user=info.context.user).delete()
         return cls(success=True, error=None)
