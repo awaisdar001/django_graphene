@@ -167,9 +167,9 @@ query{
     edges {
       node {
         id
-    	fromTime,
-    	toTime,
-    	intervalMints
+        fromTime,
+        toTime,
+        intervalMints
       }
     }
   }
