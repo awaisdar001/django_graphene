@@ -2,6 +2,7 @@
 Custom scheduler app nodes
 """
 import graphene
+from graphene import relay
 from graphene_django import DjangoObjectType
 
 from .models import Booking, Availability, UserModel
@@ -12,17 +13,18 @@ class UserType(DjangoObjectType):
 
     class Meta:
         model = UserModel
-        fields = ("id", "username", "email")
+        fields = ("id", "username", "email",)
 
 
 class AvailabilityType(DjangoObjectType):
     """Availability Object Type Definition"""
-    id = graphene.ID()
     interval_mints = graphene.String()
     user = graphene.Field(UserType)
 
     class Meta:
         model = Availability
+        interfaces = (graphene.relay.Node,)
+        filter_fields = ['user__username']
 
     @classmethod
     def resolve_interval_mints(cls, availability, info):
@@ -32,8 +34,8 @@ class AvailabilityType(DjangoObjectType):
 
 class BookingType(DjangoObjectType):
     """Booking Object Type Definition"""
-    id = graphene.ID()
     user = graphene.Field(UserType)
 
     class Meta:
         model = Booking
+        interfaces = (relay.Node,)

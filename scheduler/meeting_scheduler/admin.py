@@ -7,6 +7,7 @@ from django.contrib.sessions.models import Session
 
 from .models import Booking, Availability, UserModel as User
 
+admin.site.site_header = "Meeting Scheduler Admin panel"
 
 class SessionAdmin(admin.ModelAdmin):
     """Django session model admin """

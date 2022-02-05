@@ -130,7 +130,7 @@ mutation{
 * http://127.0.0.1:8000/api/graphql
 
 The `JWT` token will be used to create new availability. 
-The token should be passed in the request header Authorization. 
+The token should be passed in the request header Authorization. e.g. `{"Authorization": "JWT {{token}}"}`
 
 ```yaml
  mutation {

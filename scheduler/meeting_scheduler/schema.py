@@ -1,8 +1,10 @@
 import graphene
+from graphene_django.filter import DjangoFilterConnectionField
 from graphql_auth import mutations
-from graphql_auth.schema import UserQuery
 from graphql_jwt.decorators import user_passes_test
+from graphql_relay import from_global_id
 
+from .filters import BookingFilter
 from .models import Booking, Availability
 from .mutations import (
     CreateBooking, CreateAvailability, DeleteAvailability, UpdateAvailability,
@@ -14,31 +16,26 @@ class BookingQuery(graphene.ObjectType):
     """
     Describes entry point for fields to *read* data in the booking schema.
     """
-    bookings_by_user = graphene.List(
-        BookingType,
-        username=graphene.String(required=True),
-        # Alternative
-        # username=graphene.Argument(graphene.String, description="Pass username of the user.", required=True),
-    )
+    bookings = DjangoFilterConnectionField(BookingType, filterset_class=BookingFilter)
 
     @classmethod
-    def resolve_bookings_by_user(cls, root, info, username):
+    def resolve_bookings_by_user(cls, root, info, username, **kwargs):
         """Resolve bookings by user"""
         return Booking.objects.filter(user__username=username).prefetch_related('user')
 
 
-class AvailabilityQuery(UserQuery, graphene.ObjectType):
+class AvailabilityQuery(graphene.ObjectType):
     """
     Describes entry point for fields to *read* data in the availability schema.
     """
-    availabilities = graphene.List(AvailabilityType)
-    availability = graphene.Field(AvailabilityType, id=graphene.Int(
+    availabilities = DjangoFilterConnectionField(AvailabilityType, )
+    availability = graphene.Field(AvailabilityType, id=graphene.String(
         required=True, description="ID of a availability to view"
     ))
 
     @classmethod
     @user_passes_test(lambda user: user and not user.is_anonymous)
-    def resolve_availabilities(cls, root, info):
+    def resolve_availabilities(cls, root, info, *args, **kwargs):
         """Resolve the user availabilities List"""
         return Availability.objects.filter(user=info.context.user)
 
@@ -46,7 +43,8 @@ class AvailabilityQuery(UserQuery, graphene.ObjectType):
     @user_passes_test(lambda user: user and not user.is_anonymous)
     def resolve_availability(cls, root, info, id):
         """Resolve the user availability field"""
-        return Availability.objects.get(id=id, user=info.context.user)
+        __, _id = from_global_id(id)
+        return Availability.objects.get(id=_id, user=info.context.user)
 
 
 class BookingMutation(graphene.ObjectType):
